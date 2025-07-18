@@ -15,6 +15,23 @@ class ResponseValidator:
         self.required_fields = ['name', 'why_perfect', 'must_try', 'address', 'price_range']
         self.price_ranges = ['$', '$$', '$$$', '$$$$']
         
+        # Pre-compile regex patterns for better performance
+        self._compile_patterns()
+    
+    def _compile_patterns(self):
+        """Pre-compile all regex patterns for memory efficiency"""
+        # Numbered format patterns
+        self.numbered_patterns = [
+            # **1. Restaurant Name** format
+            re.compile(r'\*\*(\d+)\.\s+([^*\n]+)\*\*\s*\n\s*-?\s*Why:?\s*([^\n]+(?:\n(?!-).*)?)\n\s*-?\s*Must-try:?\s*([^\n]+)\n\s*-?\s*Address:?\s*([^\n]+)\n\s*-?\s*Price:?\s*([^\n]+)', re.MULTILINE | re.IGNORECASE),
+            
+            # 1. Restaurant Name format (no bold)
+            re.compile(r'^(\d+)\.\s+([^\n]+)\n\s*-?\s*Why:?\s*([^\n]+(?:\n(?!-).*)?)\n\s*-?\s*Must-try:?\s*([^\n]+)\n\s*-?\s*Address:?\s*([^\n]+)\n\s*-?\s*Price:?\s*([^\n]+)', re.MULTILINE | re.IGNORECASE),
+            
+            # With bullet points
+            re.compile(r'(\d+)\.\s+([^\n]+)\n\s*•\s*Why:?\s*([^\n]+(?:\n(?!•).*)?)\n\s*•\s*Must-try:?\s*([^\n]+)\n\s*•\s*Address:?\s*([^\n]+)\n\s*•\s*Price:?\s*([^\n]+)', re.MULTILINE | re.IGNORECASE)
+        ]
+        
     def validate_response(self, response: str, city: str, vibe: str) -> Dict:
         """
         Validate a Claude response for correctness
@@ -102,6 +119,15 @@ class ResponseValidator:
     def parse_claude_response(self, response: str) -> Dict:
         """Parse Claude's response into structured data"""
         
+        # Input size validation to prevent ReDoS attacks
+        max_response_length = 50000  # ~50KB reasonable limit for restaurant lists
+        if len(response) > max_response_length:
+            # Log warning and truncate or reject
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Response too large ({len(response)} chars), truncating to {max_response_length}")
+            response = response[:max_response_length]
+        
         restaurants = []
         
         # Clean response
@@ -119,35 +145,24 @@ class ResponseValidator:
         return {'restaurants': restaurants}
     
     def _parse_numbered_format(self, response: str) -> List[Dict]:
-        """Parse numbered list format (most common)"""
+        """Parse numbered list format (most common) with memory optimization"""
         restaurants = []
         
-        # Pattern for numbered entries with bold or without
-        patterns = [
-            # **1. Restaurant Name** format
-            r'\*\*(\d+)\.\s+([^*\n]+)\*\*\s*\n\s*-?\s*Why:?\s*([^\n]+(?:\n(?!-).*)?)\n\s*-?\s*Must-try:?\s*([^\n]+)\n\s*-?\s*Address:?\s*([^\n]+)\n\s*-?\s*Price:?\s*([^\n]+)',
+        # Use pre-compiled patterns for better performance
+        for pattern in self.numbered_patterns:
+            # Use finditer instead of findall to avoid creating intermediate list
+            for match in pattern.finditer(response):
+                restaurant = {
+                    'rank': int(match.group(1)),
+                    'name': match.group(2).strip().strip('*'),
+                    'why_perfect': self._clean_text(match.group(3)),
+                    'must_try': self._clean_text(match.group(4)),
+                    'address': self._clean_text(match.group(5)),
+                    'price_range': self.normalize_price(match.group(6).strip())
+                }
+                restaurants.append(restaurant)
             
-            # 1. Restaurant Name format (no bold)
-            r'^(\d+)\.\s+([^\n]+)\n\s*-?\s*Why:?\s*([^\n]+(?:\n(?!-).*)?)\n\s*-?\s*Must-try:?\s*([^\n]+)\n\s*-?\s*Address:?\s*([^\n]+)\n\s*-?\s*Price:?\s*([^\n]+)',
-            
-            # With bullet points
-            r'(\d+)\.\s+([^\n]+)\n\s*•\s*Why:?\s*([^\n]+(?:\n(?!•).*)?)\n\s*•\s*Must-try:?\s*([^\n]+)\n\s*•\s*Address:?\s*([^\n]+)\n\s*•\s*Price:?\s*([^\n]+)'
-        ]
-        
-        for pattern in patterns:
-            matches = list(re.finditer(pattern, response, re.MULTILINE | re.IGNORECASE))
-            
-            if matches:
-                for match in matches:
-                    restaurant = {
-                        'rank': int(match.group(1)),
-                        'name': match.group(2).strip().strip('*'),
-                        'why_perfect': self._clean_text(match.group(3)),
-                        'must_try': self._clean_text(match.group(4)),
-                        'address': self._clean_text(match.group(5)),
-                        'price_range': self.normalize_price(match.group(6).strip())
-                    }
-                    restaurants.append(restaurant)
+            if restaurants:  # Stop after first successful pattern
                 break
         
         return restaurants

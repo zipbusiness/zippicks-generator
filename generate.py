@@ -6,10 +6,19 @@ ZipPicks Generator - Main CLI for generating AI-powered Top 10 restaurant lists
 import click
 import yaml
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 import sys
-from typing import List, Tuple, Dict
+from typing import List, Dict
+
+# Try to load .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # python-dotenv not installed, will use system environment variables only
+    pass
 
 from data_manager import DataManager
 from prompt_engine import PromptEngine
@@ -20,7 +29,7 @@ from monitor import GenerationMonitor
 
 @click.command()
 @click.option('--mode', type=click.Choice(['daily', 'single', 'publish-all', 'status', 'validate-pending']), 
-              help='Operation mode')
+              required=True, help='Operation mode')
 @click.option('--city', help='City slug (e.g., new-york)')
 @click.option('--vibe', help='Vibe slug (e.g., date-night)')
 @click.option('--prompt-version', default='1.0', help='Prompt version to use')
@@ -41,8 +50,6 @@ def main(mode, city, vibe, prompt_version, batch_size):
         show_generation_status()
     elif mode == 'validate-pending':
         validate_all_pending()
-    else:
-        click.echo("Please specify a mode. Run with --help for options.")
 
 
 def run_daily_batch(prompt_version: str, batch_size: int):
@@ -114,8 +121,8 @@ def run_daily_batch(prompt_version: str, batch_size: int):
                 
                 # Show summary
                 click.echo(f"  ✓ Restaurant count: {validation_result['restaurant_count']}")
-                click.echo(f"  ✓ All required fields present")
-                click.echo(f"  ✓ No duplicates found")
+                click.echo("  ✓ All required fields present")
+                click.echo("  ✓ No duplicates found")
             else:
                 click.echo("❌ Validation failed:")
                 for error in validation_result['errors']:
@@ -136,8 +143,8 @@ def run_daily_batch(prompt_version: str, batch_size: int):
         if idx < len(targets) and not click.confirm("\nContinue with next city/vibe?", default=True):
             break
     
-    click.echo(f"\n🎉 Daily batch complete!")
-    click.echo(f"Run 'python generate.py --publish-all' to push validated drafts to WordPress")
+    click.echo("\n🎉 Daily batch complete!")
+    click.echo("Run 'python generate.py --publish-all' to push validated drafts to WordPress")
 
 
 def generate_single(city: str, vibe: str, prompt_version: str):
@@ -273,10 +280,25 @@ def validate_all_pending():
     valid_count = 0
     for draft_file in draft_files:
         try:
-            # Extract city/vibe from path
+            # Extract city/vibe from path with validation
             parts = draft_file.parts
+            
+            # Ensure path has enough parts
+            if len(parts) < 3:
+                click.echo(f"⚠️  Skipping {draft_file}: Invalid path structure")
+                continue
+                
             city = parts[-3]
             vibe = parts[-2]
+            
+            # Validate extracted values
+            if not city or not isinstance(city, str) or city == 'drafts':
+                click.echo(f"⚠️  Skipping {draft_file}: Invalid city value")
+                continue
+                
+            if not vibe or not isinstance(vibe, str):
+                click.echo(f"⚠️  Skipping {draft_file}: Invalid vibe value")
+                continue
             
             click.echo(f"\nValidating {city}/{vibe}...")
             
@@ -313,14 +335,35 @@ def validate_all_pending():
 
 
 # Helper functions
-def get_multiline_input() -> str:
-    """Get multiline input from user, ending with ###"""
+def get_multiline_input(max_lines: int = 1000, max_chars: int = 100000) -> str:
+    """Get multiline input from user, ending with ###
+    
+    Args:
+        max_lines: Maximum number of lines to accept (default 1000)
+        max_chars: Maximum total characters to accept (default 100000)
+    """
     lines = []
+    total_chars = 0
+    
     while True:
         line = input()
         if line.strip() == '###':
             break
+            
+        # Check line limit
+        if len(lines) >= max_lines:
+            click.echo(f"\n⚠️  Maximum line limit ({max_lines}) reached. Input truncated.")
+            break
+            
+        # Check character limit
+        line_length = len(line)
+        if total_chars + line_length > max_chars:
+            click.echo(f"\n⚠️  Maximum character limit ({max_chars}) reached. Input truncated.")
+            break
+            
         lines.append(line)
+        total_chars += line_length + 1  # +1 for newline
+        
     return '\n'.join(lines)
 
 

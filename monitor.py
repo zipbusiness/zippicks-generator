@@ -3,6 +3,7 @@ Monitor - Tracks generation progress and manages the generation queue
 """
 
 import json
+import fcntl
 from pathlib import Path
 from datetime import datetime
 from typing import List, Tuple, Dict, Set
@@ -46,10 +47,17 @@ class GenerationMonitor:
             return list(data.get('vibes', {}).keys())
     
     def _load_log(self) -> Dict:
-        """Load generation log"""
+        """Load generation log with file locking"""
         if self.log_file.exists():
             with open(self.log_file, 'r') as f:
-                return json.load(f)
+                try:
+                    # Acquire shared lock for reading
+                    fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                    data = json.load(f)
+                    return data
+                finally:
+                    # Release lock
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
         
         return {
             'generated': {},
@@ -63,11 +71,20 @@ class GenerationMonitor:
         }
     
     def _save_log(self):
-        """Save generation log"""
+        """Save generation log with file locking"""
         self.log['stats']['last_updated'] = datetime.now().isoformat()
         
+        # Ensure directory exists
+        self.log_file.parent.mkdir(parents=True, exist_ok=True)
+        
         with open(self.log_file, 'w') as f:
-            json.dump(self.log, f, indent=2)
+            try:
+                # Acquire exclusive lock for writing
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                json.dump(self.log, f, indent=2)
+            finally:
+                # Release lock
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     
     def mark_as_generated(self, city: str, vibe: str):
         """Mark a city/vibe combination as generated"""

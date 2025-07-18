@@ -13,6 +13,9 @@ cities:
       - "North Beach"
       - "Hayes Valley"
     priority: 1
+    coordinates:
+      latitude: 37.7749
+      longitude: -122.4194
     
   new-york:
     name: "New York"
@@ -25,6 +28,9 @@ cities:
       - "Upper East Side"
       - "Greenwich Village"
     priority: 1
+    coordinates:
+      latitude: 40.7128
+      longitude: -74.0060
     
   los-angeles:
     name: "Los Angeles"
@@ -37,6 +43,9 @@ cities:
       - "Downtown LA"
       - "Silver Lake"
     priority: 1
+    coordinates:
+      latitude: 34.0522
+      longitude: -118.2437
     
   chicago:
     name: "Chicago"
@@ -49,6 +58,9 @@ cities:
       - "River North"
       - "West Loop"
     priority: 2
+    coordinates:
+      latitude: 41.8781
+      longitude: -87.6298
     
   boston:
     name: "Boston"
@@ -61,6 +73,9 @@ cities:
       - "Cambridge"
       - "Beacon Hill"
     priority: 2
+    coordinates:
+      latitude: 42.3601
+      longitude: -71.0589
     
   seattle:
     name: "Seattle"
@@ -73,6 +88,9 @@ cities:
       - "Queen Anne"
       - "Georgetown"
     priority: 2
+    coordinates:
+      latitude: 47.6062
+      longitude: -122.3321
     
   austin:
     name: "Austin"
@@ -85,6 +103,9 @@ cities:
       - "Domain"
       - "South Lamar"
     priority: 3
+    coordinates:
+      latitude: 30.2672
+      longitude: -97.7431
     
   denver:
     name: "Denver"
@@ -97,6 +118,9 @@ cities:
       - "Cherry Creek"
       - "Capitol Hill"
     priority: 3
+    coordinates:
+      latitude: 39.7392
+      longitude: -104.9903
     
   portland:
     name: "Portland"
@@ -109,6 +133,9 @@ cities:
       - "Division"
       - "Mississippi"
     priority: 3
+    coordinates:
+      latitude: 45.5152
+      longitude: -122.6784
     
   miami:
     name: "Miami"
@@ -121,3 +148,6 @@ cities:
       - "Design District"
       - "Little Havana"
     priority: 3
+    coordinates:
+      latitude: 25.7617
+      longitude: -80.1918

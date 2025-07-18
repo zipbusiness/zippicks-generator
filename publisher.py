@@ -3,12 +3,18 @@ Publisher - Handles publishing to WordPress with SEO and schema markup
 """
 
 import json
+import logging
+import os
 import requests
 from datetime import datetime
 from typing import Dict, List, Optional
 import yaml
 from pathlib import Path
 from schema_builder import SchemaBuilder
+from utils.rate_limiter import wordpress_rate_limiter, rate_limit, RateLimiter
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 class Publisher:
@@ -19,34 +25,67 @@ class Publisher:
         self.schema_builder = SchemaBuilder()
         self.session = requests.Session()
         
-        # Set up authentication
-        if self.config.get('auth_type') == 'basic':
-            self.session.auth = (
-                self.config.get('username'),
-                self.config.get('password')
-            )
-        elif self.config.get('auth_type') == 'application':
-            self.session.headers['Authorization'] = f"Bearer {self.config.get('api_key')}"
+        # Load rate limiting config
+        self.rate_limiter = self._configure_rate_limiting()
+        
+        # Set up authentication using environment variables
+        auth_type = os.getenv('WP_AUTH_TYPE', self.config.get('auth_type', 'basic'))
+        
+        if auth_type == 'basic':
+            # Use environment variables for credentials, fall back to config only if not set
+            username = os.getenv('WP_USERNAME', self.config.get('username'))
+            password = os.getenv('WP_PASSWORD', self.config.get('password'))
+            
+            if not username or not password:
+                logger.warning("WordPress credentials not found in environment variables. Set WP_USERNAME and WP_PASSWORD.")
+            
+            self.session.auth = (username, password)
+        elif auth_type == 'application':
+            # Use environment variable for API key
+            api_key = os.getenv('WP_API_KEY', self.config.get('api_key'))
+            
+            if not api_key:
+                logger.warning("WordPress API key not found in environment. Set WP_API_KEY.")
+                
+            self.session.headers['Authorization'] = f"Bearer {api_key}"
     
     def _load_config(self, config_file: str) -> Dict:
-        """Load WordPress configuration"""
+        """Load WordPress configuration (non-sensitive settings only)"""
         config_path = Path(config_file)
         
+        # Default configuration with environment variable fallbacks
+        default_config = {
+            'site_url': os.getenv('WP_SITE_URL', 'https://your-site.com'),
+            'api_endpoint': os.getenv('WP_API_ENDPOINT', '/wp-json/wp/v2'),
+            'auth_type': 'application',
+            # Note: credentials should ONLY come from environment variables
+        }
+        
         if not config_path.exists():
-            # Return default config
-            return {
-                'site_url': 'https://your-site.com',
-                'api_endpoint': '/wp-json/wp/v2',
-                'auth_type': 'application',
-                'api_key': 'your-api-key'
-            }
+            return default_config
         
         with open(config_path, 'r') as f:
-            return yaml.safe_load(f)
+            file_config = yaml.safe_load(f)
+            
+        # Merge configs, but never include sensitive data from file
+        config = default_config.copy()
+        
+        # Only copy non-sensitive configuration from file
+        safe_keys = ['site_url', 'api_endpoint', 'auth_type', 'category_mapping', 'tag_mapping']
+        for key in safe_keys:
+            if key in file_config:
+                config[key] = file_config[key]
+                
+        # Log warning if credentials found in config file
+        if any(key in file_config for key in ['username', 'password', 'api_key']):
+            logger.warning("Credentials found in config file. These will be ignored. Use environment variables instead.")
+            
+        return config
     
+    @wordpress_rate_limiter
     def publish_to_wordpress(self, data: Dict) -> Optional[int]:
         """
-        Publish a restaurant list to WordPress
+        Publish a restaurant list to WordPress (rate-limited)
         
         Args:
             data: Validated restaurant data with city, vibe, and restaurants
@@ -311,8 +350,9 @@ class Publisher:
             '_yoast_wpseo_content_score': '80'
         }
     
+    @wordpress_rate_limiter
     def update_post(self, post_id: int, data: Dict) -> bool:
-        """Update an existing WordPress post"""
+        """Update an existing WordPress post (rate-limited)"""
         
         try:
             content = self._generate_content(data)
@@ -328,11 +368,12 @@ class Publisher:
             return response.status_code == 200
             
         except Exception as e:
-            print(f"❌ Error updating post: {str(e)}")
+            logger.error(f"Error updating post: {str(e)}")
             return False
     
+    @rate_limit(2.0)  # 2 calls per second
     def get_published_posts(self, city: Optional[str] = None, vibe: Optional[str] = None) -> List[Dict]:
-        """Get list of published posts, optionally filtered"""
+        """Get list of published posts, optionally filtered (rate-limited)"""
         
         try:
             api_url = f"{self.config['site_url']}{self.config['api_endpoint']}/posts"
@@ -342,25 +383,45 @@ class Publisher:
             }
             
             # Add meta queries if filters provided
-            if city or vibe:
-                meta_query = []
-                if city:
-                    meta_query.append(f"meta_key=city&meta_value={city}")
-                if vibe:
-                    meta_query.append(f"meta_key=vibe&meta_value={vibe}")
-                params['meta_query'] = '&'.join(meta_query)
+            if city:
+                # Use separate parameters for safe meta queries
+                params['meta_key'] = 'city'
+                params['meta_value'] = city
+            elif vibe:
+                # WordPress REST API typically only supports one meta query at a time
+                params['meta_key'] = 'vibe'
+                params['meta_value'] = vibe
+            
+            # Note: For complex meta queries, consider using the filter parameter
+            # with proper JSON encoding or implementing server-side custom endpoints
             
             response = self.session.get(api_url, params=params)
             
             if response.status_code == 200:
                 return response.json()
             else:
-                print(f"❌ Failed to get posts: {response.status_code}")
+                logger.error(f"Failed to get posts: {response.status_code}")
                 return []
                 
         except Exception as e:
-            print(f"❌ Error getting posts: {str(e)}")
+            logger.error(f"Error getting posts: {str(e)}")
             return []
+    
+    def _configure_rate_limiting(self):
+        """Configure rate limiting based on settings"""
+        rate_config_path = Path("config/rate_limits.yaml")
+        
+        if rate_config_path.exists():
+            with open(rate_config_path, 'r') as f:
+                config = yaml.safe_load(f)
+                
+            wp_limits = config.get('rate_limits', {}).get('wordpress', {})
+            calls_per_second = wp_limits.get('calls_per_second', 10)
+            
+            return RateLimiter(calls=calls_per_second, period=1.0)
+        else:
+            # Default rate limiter
+            return RateLimiter(calls=10, period=1.0)
 
 
 if __name__ == "__main__":

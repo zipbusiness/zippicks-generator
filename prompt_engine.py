@@ -4,9 +4,10 @@ Prompt Engine - Manages prompt templates with version tracking
 
 import yaml
 import json
+import re
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 import pandas as pd
 
 
@@ -60,6 +61,20 @@ class PromptEngine:
             
         return sorted(versions, key=lambda x: float(x))[-1]
     
+    def _validate_template_placeholders(self) -> None:
+        """Validate that all required placeholders exist in the template"""
+        # Extract all placeholders from template using regex
+        placeholder_pattern = r'\{(\w+)\}'
+        found_placeholders = set(re.findall(placeholder_pattern, self.template))
+        
+        # Define required placeholders
+        required_placeholders = {'city', 'vibe', 'vibe_description', 'restaurants_list', 'date'}
+        
+        # Check for missing placeholders
+        missing_placeholders = required_placeholders - found_placeholders
+        if missing_placeholders:
+            raise ValueError(f"Template is missing required placeholders: {', '.join(missing_placeholders)}")
+    
     def _get_default_template(self) -> str:
         """Get default prompt template"""
         return """You are a local food expert creating a Top 10 list of {vibe} restaurants in {city}.
@@ -111,6 +126,9 @@ Remember: Focus on what makes each restaurant perfect for "{vibe}" specifically.
         city_name = city.replace('-', ' ').title()
         vibe_name = vibe.replace('-', ' ')
         
+        # Validate template placeholders before formatting
+        self._validate_template_placeholders()
+        
         # Fill template
         prompt = self.template.format(
             city=city_name,
@@ -131,74 +149,69 @@ Remember: Focus on what makes each restaurant perfect for "{vibe}" specifically.
         }
     
     def _format_restaurants(self, df: pd.DataFrame) -> str:
-        """Format restaurant data for prompt"""
-        restaurants = []
+        """Format restaurant data for prompt using memory-efficient approach"""
+        # Use list comprehension and join for better memory efficiency
+        # Process in chunks to avoid building large intermediate strings
         
-        for idx, row in df.iterrows():
-            # Build restaurant entry
+        def format_restaurant(row):
+            """Format a single restaurant entry"""
             lines = [
                 f"Name: {row['name']}",
-                f"Rating: {row['yelp_rating']:.1f} stars",
+                f"Rating: {row['yelp_rating']:.1f} stars"
             ]
             
-            # Add review count if available
-            if 'yelp_review_count' in row and pd.notna(row['yelp_review_count']):
+            # Add optional fields efficiently
+            if pd.notna(row.get('yelp_review_count', None)):
                 lines.append(f"Reviews: {int(row['yelp_review_count'])} reviews")
             
-            # Add price range
             lines.append(f"Price: {row.get('price_range', '$')}")
             
-            # Add cuisine type if available
-            if 'cuisine_type' in row and pd.notna(row['cuisine_type']):
+            if pd.notna(row.get('cuisine_type', None)):
                 lines.append(f"Cuisine: {row['cuisine_type']}")
             
-            # Add address
             lines.append(f"Address: {row['address']}")
             
-            # Add neighborhood if available
-            if 'neighborhood' in row and pd.notna(row['neighborhood']):
+            if pd.notna(row.get('neighborhood', None)):
                 lines.append(f"Neighborhood: {row['neighborhood']}")
             
             # Parse vibe attributes if available
-            if 'vibe_attributes' in row and pd.notna(row['vibe_attributes']):
+            vibe_attr = row.get('vibe_attributes')
+            if vibe_attr and pd.notna(vibe_attr):
                 try:
-                    if isinstance(row['vibe_attributes'], str):
-                        vibe_attrs = json.loads(row['vibe_attributes'])
-                    else:
-                        vibe_attrs = row['vibe_attributes']
-                    
+                    vibe_attrs = json.loads(vibe_attr) if isinstance(vibe_attr, str) else vibe_attr
                     positive_vibes = [k for k, v in vibe_attrs.items() if v]
                     if positive_vibes:
                         lines.append(f"Atmosphere: {', '.join(positive_vibes)}")
-                except:
+                except (json.JSONDecodeError, AttributeError):
                     pass
             
-            # Add description if available
-            if 'description' in row and pd.notna(row['description']):
-                desc = str(row['description'])[:200]
-                if len(desc) == 200:
-                    desc += "..."
-                lines.append(f"About: {desc}")
+            # Add description if available (limit to save memory)
+            desc = row.get('description')
+            if desc and pd.notna(desc):
+                desc_text = str(desc)[:200]
+                lines.append(f"About: {desc_text}{'...' if len(str(desc)) > 200 else ''}")
             
             # Add review excerpt if available
-            if 'review_excerpts' in row and pd.notna(row['review_excerpts']):
+            review_data = row.get('review_excerpts')
+            if review_data and pd.notna(review_data):
                 try:
-                    if isinstance(row['review_excerpts'], str):
-                        reviews = json.loads(row['review_excerpts'])
-                    else:
-                        reviews = row['review_excerpts']
+                    reviews = json.loads(review_data) if isinstance(review_data, str) else review_data
                     
                     if reviews and len(reviews) > 0:
                         review_text = reviews[0].get('text', '')[:150]
                         if review_text:
                             lines.append(f'Recent Review: "{review_text}..."')
-                except:
+                except (json.JSONDecodeError, AttributeError, TypeError):
                     pass
             
-            # Join lines and add to list
-            restaurants.append('\n'.join(lines))
+            return '\n'.join(lines)
         
-        return '\n\n'.join(restaurants)
+        # Use generator expression for memory efficiency
+        # Process restaurants in batches to avoid holding all formatted data in memory
+        formatted_restaurants = (format_restaurant(row) for _, row in df.iterrows())
+        
+        # Join with double newline, using generator to avoid building full list
+        return '\n\n'.join(formatted_restaurants)
     
     def _load_vibes(self) -> Dict:
         """Load vibe definitions"""

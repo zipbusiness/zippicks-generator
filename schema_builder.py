@@ -5,6 +5,8 @@ Schema Builder - Generates JSON-LD structured data for SEO
 from typing import Dict, List
 from datetime import datetime
 import json
+import yaml
+from pathlib import Path
 
 
 class SchemaBuilder:
@@ -12,7 +14,18 @@ class SchemaBuilder:
     
     def __init__(self):
         self.base_context = "https://schema.org"
+        self._load_city_config()
         
+    def _load_city_config(self):
+        """Load city configuration from YAML file"""
+        config_path = Path("config/cities.yaml")
+        if config_path.exists():
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+                self.cities = config.get('cities', {})
+        else:
+            self.cities = {}
+            
     def generate_restaurant_list_schema(self, restaurants: List[Dict], city: str, vibe: str) -> Dict:
         """Generate ItemList schema for the entire restaurant list"""
         
@@ -249,23 +262,22 @@ class SchemaBuilder:
         return amenities
     
     def _get_city_coordinates(self, city: str) -> Dict:
-        """Get approximate coordinates for major cities"""
+        """Get approximate coordinates for major cities from config"""
         
-        # Major city coordinates (expand as needed)
-        city_coords = {
-            'San Francisco': {'latitude': 37.7749, 'longitude': -122.4194},
-            'New York': {'latitude': 40.7128, 'longitude': -74.0060},
-            'Los Angeles': {'latitude': 34.0522, 'longitude': -118.2437},
-            'Chicago': {'latitude': 41.8781, 'longitude': -87.6298},
-            'Boston': {'latitude': 42.3601, 'longitude': -71.0589},
-            'Seattle': {'latitude': 47.6062, 'longitude': -122.3321},
-            'Austin': {'latitude': 30.2672, 'longitude': -97.7431},
-            'Denver': {'latitude': 39.7392, 'longitude': -104.9903},
-            'Portland': {'latitude': 45.5152, 'longitude': -122.6784},
-            'Miami': {'latitude': 25.7617, 'longitude': -80.1918}
-        }
+        # Find city in config (handle various formats)
+        city_key = None
+        for key, city_data in self.cities.items():
+            if city_data.get('name', '').lower() == city.lower():
+                city_key = key
+                break
         
-        coords = city_coords.get(city, {'latitude': 39.8283, 'longitude': -98.5795})  # US center as default
+        # Get coordinates from config or use US center as default
+        default_coords = {'latitude': 39.8283, 'longitude': -98.5795}
+        
+        if city_key and 'coordinates' in self.cities[city_key]:
+            coords = self.cities[city_key]['coordinates']
+        else:
+            coords = default_coords
         
         return {
             "@type": "GeoCoordinates",
