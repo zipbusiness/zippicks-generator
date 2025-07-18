@@ -291,7 +291,8 @@ def create_new_prompt_version(base_version: str, changes: str) -> str:
     try:
         major, minor = base_version.split('.')
         new_version = f"{major}.{int(minor) + 1}"
-    except:
+    except (ValueError, IndexError) as e:
+        logger.warning(f"Error parsing version: {e}")
         # Default to incrementing from 1.0
         new_version = "1.1"
     

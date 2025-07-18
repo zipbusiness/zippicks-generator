@@ -3,8 +3,7 @@ Response Validator - Validates Claude responses for structure and quality
 """
 
 import re
-import json
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional
 from datetime import datetime
 
 

@@ -305,17 +305,17 @@ class SchemaBuilder:
                     "answer": f"All of our recommended family-friendly restaurants in {city} offer dedicated kids menus with favorites like chicken fingers, pasta, and grilled cheese."
                 },
                 {
-                    "question": f"Do these restaurants have high chairs available?",
-                    "answer": f"Yes, every restaurant on our family-friendly list provides high chairs and booster seats for young diners."
+                    "question": "Do these restaurants have high chairs available?",
+                    "answer": "Yes, every restaurant on our family-friendly list provides high chairs and booster seats for young diners."
                 }
             ],
             'quick-lunch': [
                 {
                     "question": f"How fast is service at these {city} lunch spots?",
-                    "answer": f"Most restaurants on our quick lunch list can serve your meal within 15-20 minutes, perfect for busy lunch breaks."
+                    "answer": "Most restaurants on our quick lunch list can serve your meal within 15-20 minutes, perfect for busy lunch breaks."
                 },
                 {
-                    "question": f"Do these restaurants offer takeout?",
+                    "question": "Do these restaurants offer takeout?",
                     "answer": f"Yes, all of our recommended quick lunch spots in {city} offer takeout options for even faster service."
                 }
             ]

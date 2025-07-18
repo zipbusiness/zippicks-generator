@@ -131,14 +131,14 @@ class Publisher:
             
             if response.status_code in [200, 201]:
                 post_id = response.json().get('id')
-                print(f"✅ Published successfully! Post ID: {post_id}")
+                logger.info(f"Published successfully! Post ID: {post_id}")
                 return post_id
             else:
-                print(f"❌ Failed to publish: {response.status_code} - {response.text}")
+                logger.error(f"Failed to publish: {response.status_code} - {response.text}")
                 return None
                 
         except Exception as e:
-            print(f"❌ Error publishing to WordPress: {str(e)}")
+            logger.error(f"Error publishing to WordPress: {str(e)}")
             return None
     
     def _generate_title(self, data: Dict) -> str:
@@ -449,6 +449,6 @@ if __name__ == "__main__":
     
     # Test content generation
     content = publisher._generate_content(test_data)
-    print("Generated content preview:")
-    print(content[:500] + "...")
-    print(f"\nTotal content length: {len(content)} characters")
+    logger.info("Generated content preview:")
+    logger.info(content[:500] + "...")
+    logger.info(f"Total content length: {len(content)} characters")

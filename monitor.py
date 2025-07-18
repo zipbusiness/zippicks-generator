@@ -6,7 +6,7 @@ import json
 import fcntl
 from pathlib import Path
 from datetime import datetime
-from typing import List, Tuple, Dict, Set
+from typing import List, Tuple, Dict
 import yaml
 
 

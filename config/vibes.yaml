@@ -32,7 +32,7 @@ vibes:
       - quiet_ambiance
       - wine_selection
       - reservation_recommended
-      
+
   family-friendly:
     name: "Family Friendly"
     description: "Welcoming restaurants perfect for families with children, offering kid-friendly menus and comfortable atmospheres"
@@ -62,7 +62,7 @@ vibes:
       - high_chairs
       - casual_atmosphere
       - quick_service
-      
+
   quick-lunch:
     name: "Quick Lunch"
     description: "Fast, efficient restaurants perfect for lunch breaks, offering quality food with speedy service"
@@ -92,7 +92,7 @@ vibes:
       - lunch_specials
       - takeout_available
       - online_ordering
-      
+
   trendy-vibes:
     name: "Trendy Vibes"
     description: "Hip, modern restaurants where locals go to see and be seen, featuring innovative menus and stylish decor"
@@ -122,7 +122,7 @@ vibes:
       - instagram_worthy
       - craft_cocktails
       - small_plates
-      
+
   late-night:
     name: "Late Night"
     description: "Restaurants serving quality food well past typical dining hours, perfect for night owls and after-hours dining"
@@ -152,7 +152,7 @@ vibes:
       - full_bar
       - late_night_menu
       - delivery_available
-      
+
   hidden-gems:
     name: "Hidden Gems"
     description: "Under-the-radar restaurants beloved by locals, offering authentic experiences away from tourist crowds"
@@ -182,7 +182,7 @@ vibes:
       - authentic_cuisine
       - neighborhood_spot
       - family_owned
-      
+
   outdoor-dining:
     name: "Outdoor Dining"
     description: "Restaurants with exceptional outdoor seating, from rooftop terraces to garden patios"
