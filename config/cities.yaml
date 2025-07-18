@@ -1,0 +1,123 @@
+# Cities configuration for ZipPicks
+# Add new cities here with their metadata
+
+cities:
+  san-francisco:
+    name: "San Francisco"
+    state: "CA"
+    alt_names: ["sf", "san-francisco-ca"]
+    neighborhoods:
+      - "Mission District"
+      - "SOMA"
+      - "Marina"
+      - "North Beach"
+      - "Hayes Valley"
+    priority: 1
+    
+  new-york:
+    name: "New York"
+    state: "NY"
+    alt_names: ["nyc", "new-york-city", "manhattan"]
+    neighborhoods:
+      - "Manhattan"
+      - "Brooklyn"
+      - "Queens"
+      - "Upper East Side"
+      - "Greenwich Village"
+    priority: 1
+    
+  los-angeles:
+    name: "Los Angeles"
+    state: "CA"
+    alt_names: ["la", "los-angeles-ca"]
+    neighborhoods:
+      - "Beverly Hills"
+      - "Santa Monica"
+      - "Venice"
+      - "Downtown LA"
+      - "Silver Lake"
+    priority: 1
+    
+  chicago:
+    name: "Chicago"
+    state: "IL"
+    alt_names: ["chi-town", "chicago-il"]
+    neighborhoods:
+      - "Loop"
+      - "Lincoln Park"
+      - "Wicker Park"
+      - "River North"
+      - "West Loop"
+    priority: 2
+    
+  boston:
+    name: "Boston"
+    state: "MA"
+    alt_names: ["boston-ma", "beantown"]
+    neighborhoods:
+      - "Back Bay"
+      - "North End"
+      - "South End"
+      - "Cambridge"
+      - "Beacon Hill"
+    priority: 2
+    
+  seattle:
+    name: "Seattle"
+    state: "WA"
+    alt_names: ["seattle-wa", "emerald-city"]
+    neighborhoods:
+      - "Capitol Hill"
+      - "Fremont"
+      - "Ballard"
+      - "Queen Anne"
+      - "Georgetown"
+    priority: 2
+    
+  austin:
+    name: "Austin"
+    state: "TX"
+    alt_names: ["austin-tx", "atx"]
+    neighborhoods:
+      - "Downtown"
+      - "South Congress"
+      - "East Austin"
+      - "Domain"
+      - "South Lamar"
+    priority: 3
+    
+  denver:
+    name: "Denver"
+    state: "CO"
+    alt_names: ["denver-co", "mile-high-city"]
+    neighborhoods:
+      - "LoDo"
+      - "RiNo"
+      - "Highland"
+      - "Cherry Creek"
+      - "Capitol Hill"
+    priority: 3
+    
+  portland:
+    name: "Portland"
+    state: "OR"
+    alt_names: ["portland-or", "pdx"]
+    neighborhoods:
+      - "Pearl District"
+      - "Alberta"
+      - "Hawthorne"
+      - "Division"
+      - "Mississippi"
+    priority: 3
+    
+  miami:
+    name: "Miami"
+    state: "FL"
+    alt_names: ["miami-fl", "magic-city"]
+    neighborhoods:
+      - "South Beach"
+      - "Wynwood"
+      - "Brickell"
+      - "Design District"
+      - "Little Havana"
+    priority: 3

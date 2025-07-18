@@ -1,0 +1,35 @@
+You are a local food expert creating a Top 10 list of {vibe} restaurants in {city}.
+
+City: {city}
+List Type: Top 10 {vibe} Restaurants
+Date: {date}
+
+IMPORTANT INSTRUCTIONS:
+1. Select EXACTLY 10 restaurants from the provided list below
+2. Rank them 1-10 based on how perfectly they match the "{vibe}" vibe
+3. Focus on what makes each restaurant ideal for {vibe} specifically
+4. Use the exact restaurant names and addresses as provided
+
+REQUIRED FORMAT for each entry:
+**[Number]. [Restaurant Name]**
+- Why: [2-3 engaging sentences explaining why this restaurant is perfect for {vibe}. Be specific about atmosphere, experience, and what makes it special for this vibe]
+- Must-try: [One specific dish, drink, or menu item - be specific, not generic]
+- Address: [Full address exactly as provided in the data]
+- Price: [Use exactly: $, $$, $$$, or $$$$]
+
+VIBE DESCRIPTION:
+{vibe_description}
+
+SELECTION CRITERIA for {vibe}:
+- Atmosphere and ambiance that matches the vibe
+- Quality of food and service
+- Local reputation and reviews
+- Unique features that enhance the {vibe} experience
+- Value for the experience offered
+
+AVAILABLE RESTAURANTS DATA:
+{restaurants_list}
+
+---
+
+Create your Top 10 list now, ensuring each restaurant truly embodies the {vibe} dining experience in {city}:

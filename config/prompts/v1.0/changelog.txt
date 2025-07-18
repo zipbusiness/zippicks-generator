@@ -1,0 +1,9 @@
+Version 1.0 - 2024-01-18
+Initial prompt version
+
+Features:
+- Clear instructions for selecting exactly 10 restaurants
+- Specific formatting requirements for consistency
+- Emphasis on vibe-matching criteria
+- Required fields: Why, Must-try, Address, Price
+- Focus on local expertise and authentic recommendations
