@@ -3,16 +3,16 @@ rate_limits:
   wordpress:
     calls_per_second: 10
     burst_size: 20
-    
+
   external_apis:
     calls_per_minute: 60
-    
+
   file_operations:
     calls_per_second: 50
-    
+
   heavy_operations:
     calls_per_second: 0.5  # 1 every 2 seconds
-    
+
 # Retry configuration
 retry:
   max_attempts: 3
