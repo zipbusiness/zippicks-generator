@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# Data files
+data/restaurants.csv
+data/cache/
+output/drafts/
+output/validated/
+output/published/
+output/failed/
+output/logs/
+
+# Config with sensitive data
+config/wp_config.yaml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# Reports
+*.csv
+generation_report.csv
+
+# Keep directory structure
+!data/.gitkeep
+!output/.gitkeep
+!output/drafts/.gitkeep
+!output/validated/.gitkeep
+!output/published/.gitkeep
+!output/failed/.gitkeep
+!output/logs/.gitkeep
