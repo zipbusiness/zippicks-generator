@@ -1,0 +1,5 @@
+# This file defines code owners for the repository
+# All pull requests will require review from the specified owners
+
+# Global rule - all files require review from @zipbusiness
+*    @zipbusiness
