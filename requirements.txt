@@ -1,0 +1,8 @@
+# Security Note: Monitor requests package for CVEs via https://github.com/psf/requests/security/advisories
+# Pin to exact versions tested
+pandas==2.1.3
+pyyaml==6.0.1
+requests==2.31.0
+click==8.1.7
+python-dateutil==2.8.2
+python-dotenv==1.0.0

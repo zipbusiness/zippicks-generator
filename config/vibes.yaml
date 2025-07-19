@@ -1,0 +1,214 @@
+# Vibes configuration for ZipPicks
+# Define restaurant vibes/categories with their filters
+
+vibes:
+  date-night:
+    name: "Date Night"
+    description: "Romantic restaurants perfect for couples, featuring intimate atmospheres, dim lighting, and exceptional service"
+    keywords:
+      - romantic
+      - intimate
+      - candlelit
+      - cozy
+      - special occasion
+      - wine bar
+      - fine dining
+    filters:
+      price_ranges: ["$$", "$$$", "$$$$"]
+      cuisines:
+        - italian
+        - french
+        - japanese
+        - steakhouse
+        - mediterranean
+      keywords:
+        - romantic
+        - intimate
+        - wine
+        - cocktail
+        - dim lighting
+    attributes:
+      - romantic_atmosphere
+      - quiet_ambiance
+      - wine_selection
+      - reservation_recommended
+
+  family-friendly:
+    name: "Family Friendly"
+    description: "Welcoming restaurants perfect for families with children, offering kid-friendly menus and comfortable atmospheres"
+    keywords:
+      - family
+      - kids menu
+      - casual
+      - spacious
+      - high chairs
+      - crayons
+    filters:
+      price_ranges: ["$", "$$", "$$$"]
+      cuisines:
+        - american
+        - italian
+        - mexican
+        - pizza
+        - asian
+      keywords:
+        - family
+        - kids
+        - casual
+        - comfortable
+        - spacious
+    attributes:
+      - kids_menu
+      - high_chairs
+      - casual_atmosphere
+      - quick_service
+
+  quick-lunch:
+    name: "Quick Lunch"
+    description: "Fast, efficient restaurants perfect for lunch breaks, offering quality food with speedy service"
+    keywords:
+      - fast
+      - quick
+      - lunch special
+      - counter service
+      - takeout
+      - grab and go
+    filters:
+      price_ranges: ["$", "$$"]
+      cuisines:
+        - sandwich
+        - salad
+        - asian
+        - mexican
+        - mediterranean
+      keywords:
+        - fast
+        - quick
+        - lunch
+        - takeout
+        - counter
+    attributes:
+      - fast_service
+      - lunch_specials
+      - takeout_available
+      - online_ordering
+
+  trendy-vibes:
+    name: "Trendy Vibes"
+    description: "Hip, modern restaurants where locals go to see and be seen, featuring innovative menus and stylish decor"
+    keywords:
+      - trendy
+      - hip
+      - modern
+      - instagram worthy
+      - craft cocktails
+      - small plates
+    filters:
+      price_ranges: ["$$", "$$$", "$$$$"]
+      cuisines:
+        - contemporary
+        - fusion
+        - gastropub
+        - tapas
+        - cocktail bar
+      keywords:
+        - trendy
+        - modern
+        - hip
+        - cocktail
+        - craft
+    attributes:
+      - trendy_atmosphere
+      - instagram_worthy
+      - craft_cocktails
+      - small_plates
+
+  late-night:
+    name: "Late Night"
+    description: "Restaurants serving quality food well past typical dining hours, perfect for night owls and after-hours dining"
+    keywords:
+      - late night
+      - open late
+      - 24 hour
+      - midnight
+      - after hours
+      - bar food
+    filters:
+      price_ranges: ["$", "$$", "$$$"]
+      cuisines:
+        - diner
+        - bar food
+        - pizza
+        - asian
+        - mexican
+      keywords:
+        - late
+        - night
+        - midnight
+        - 24
+        - bar
+    attributes:
+      - open_late
+      - full_bar
+      - late_night_menu
+      - delivery_available
+
+  hidden-gems:
+    name: "Hidden Gems"
+    description: "Under-the-radar restaurants beloved by locals, offering authentic experiences away from tourist crowds"
+    keywords:
+      - hidden
+      - local favorite
+      - authentic
+      - neighborhood
+      - secret
+      - off the beaten path
+    filters:
+      price_ranges: ["$", "$$", "$$$"]
+      cuisines:
+        - ethnic
+        - authentic
+        - local
+        - traditional
+        - homestyle
+      keywords:
+        - local
+        - authentic
+        - neighborhood
+        - family-owned
+        - traditional
+    attributes:
+      - local_favorite
+      - authentic_cuisine
+      - neighborhood_spot
+      - family_owned
+
+  outdoor-dining:
+    name: "Outdoor Dining"
+    description: "Restaurants with exceptional outdoor seating, from rooftop terraces to garden patios"
+    keywords:
+      - outdoor
+      - patio
+      - rooftop
+      - terrace
+      - al fresco
+      - garden
+    filters:
+      price_ranges: ["$$", "$$$", "$$$$"]
+      cuisines:
+        - mediterranean
+        - american
+        - mexican
+        - seafood
+        - italian
+      keywords:
+        - outdoor
+        - patio
+        - rooftop
+        - terrace
+        - garden
+    attributes:
+      - outdoor_seating
+      - rooftop_dining
+      - patio_heaters
+      - scenic_views

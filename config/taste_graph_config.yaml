@@ -1,0 +1,135 @@
+# Taste Graph Configuration
+# This configuration file controls the behavior of the ZipPicks Taste Graph system
+
+database:
+  # PostgreSQL connection settings
+  host: ${POSTGRES_HOST:localhost}
+  port: ${POSTGRES_PORT:5432}
+  database: ${POSTGRES_DB:zipbusiness}
+  user: ${POSTGRES_USER:postgres}
+  password: ${POSTGRES_PASSWORD:}
+  
+  # Connection pool settings
+  pool:
+    min_connections: 2
+    max_connections: 10
+    
+vibe_extraction:
+  # Claude API settings
+  api_key: ${ANTHROPIC_API_KEY}
+  model: claude-3-opus-20240229
+  
+  # Extraction settings
+  batch_size: 10
+  max_retries: 3
+  retry_delay: 5  # seconds
+  
+  # Vibe confidence thresholds
+  min_confidence: 0.3
+  high_confidence: 0.7
+  
+  # Data sources to use
+  use_reviews: true
+  use_description: true
+  use_menu: false  # Future enhancement
+  use_photos: false  # Future enhancement
+  
+  # Review settings
+  max_reviews_per_restaurant: 5
+  min_review_length: 20  # characters
+  
+taste_engine:
+  # Preference learning settings
+  temporal_decay_rate: 0.95
+  min_interactions_for_profile: 5
+  
+  # Matching weights
+  weights:
+    vibe: 0.4
+    cuisine: 0.3
+    price: 0.15
+    context: 0.15
+    
+  # Recommendation settings
+  default_recommendation_count: 20
+  min_match_score: 0.3
+  
+  # Context awareness
+  time_contexts:
+    - breakfast
+    - lunch
+    - dinner
+    - late_night
+    
+  weather_contexts:
+    - sunny
+    - rainy
+    - cold
+    - hot
+    
+relationship_mapping:
+  # Similarity thresholds
+  min_similarity: 0.3
+  high_similarity: 0.7
+  
+  # Relationship limits
+  max_relationships_per_restaurant: 10
+  
+  # Clustering settings
+  min_cluster_size: 3
+  
+caching:
+  # Redis/Valkey cache settings
+  host: ${VALKEY_HOST:localhost}
+  port: ${VALKEY_PORT:6379}
+  password: ${VALKEY_PASSWORD:}
+  
+  # Cache TTLs (in seconds)
+  ttl:
+    user_profile: 86400  # 24 hours
+    restaurant_vibes: 604800  # 7 days
+    recommendations: 43200  # 12 hours
+    insights: 86400  # 24 hours
+    
+analytics:
+  # Insight generation settings
+  min_data_points: 10
+  confidence_threshold: 0.6
+  
+  # Trend detection
+  trend_window_days: 30
+  min_trend_growth: 0.1  # 10% growth
+  
+  # Performance benchmarking
+  peer_group_size: 20
+  percentile_buckets: [25, 50, 75, 90]
+  
+api:
+  # API rate limiting
+  requests_per_minute: 100
+  burst_size: 200
+  
+  # Response settings
+  max_page_size: 100
+  default_page_size: 20
+  
+  # Timeout settings
+  request_timeout: 30  # seconds
+  
+monitoring:
+  # Logging settings
+  log_level: INFO
+  log_format: json
+  
+  # Metrics collection
+  enable_metrics: true
+  metrics_port: 9090
+  
+  # Health check
+  health_check_interval: 60  # seconds
+  
+  # Alerting thresholds
+  alerts:
+    high_latency_ms: 500
+    low_cache_hit_rate: 0.8
+    high_error_rate: 0.05
