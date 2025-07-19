@@ -1,0 +1,1 @@
+"""Business intelligence components for restaurant analytics and insights."""
